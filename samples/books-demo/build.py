@@ -10,6 +10,7 @@ qui l'a produit, donc rien n'est une boîte noire et le traitement est rejouable
 import csv
 import statistics
 from datetime import date
+from html import unescape
 from pathlib import Path
 
 from openpyxl import Workbook
@@ -36,7 +37,10 @@ def load_rows():
     rows = []
     for r in raw:
         rows.append({
-            "titre": r["titre"].strip(),
+            # les attributs du site contiennent des entités HTML (&#39; pour l'apostrophe) :
+            # décodées ici, et volontairement pas dans le fichier brut, pour que le nettoyage
+            # reste visible et rejouable — c'est la valeur ajoutée du livrable.
+            "titre": unescape(r["titre"]).strip(),
             "prix": float(r["prix_gbp"]),
             "dispo": r["disponibilite"].strip(),
             "note": int(r["note_sur_5"]) if r["note_sur_5"] else None,
