@@ -75,8 +75,18 @@ def build_catalogue(wb, rows):
         row[4].hyperlink = row[4].value                   # URL cliquable
         row[4].font = Font(color="0563C1", underline="single", size=10)
 
-    for col, width in zip("ABCDEF", (46, 12, 16, 9, 58, 7)):
+    # Largeurs : la colonne des titres doit rester lisible à l'impression. Sinon LibreOffice
+    # rogne le texte à l'export PDF (constaté : 36 titres coupés à 50 caractères), et un
+    # extracteur qui travaille sur ce PDF livre des lignes abîmées sans le voir.
+    for col, width in zip("ABCDEF", (72, 12, 16, 9, 58, 7)):
         ws.column_dimensions[col].width = width
+    # Mise en page d'impression : paysage et ajusté à une page de large, pour que l'export PDF
+    # ne découpe pas les colonnes sur plusieurs pages.
+    from openpyxl.worksheet.properties import PageSetupProperties
+    ws.page_setup.orientation = "landscape"
+    ws.page_setup.fitToWidth = 1
+    ws.page_setup.fitToHeight = 0
+    ws.sheet_properties.pageSetUpPr = PageSetupProperties(fitToPage=True)
     ws.freeze_panes = "A2"
     ws.auto_filter.ref = f"A1:F{last}"
     table = Table(displayName="Catalogue", ref=f"A1:F{last}")
